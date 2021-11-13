@@ -8,22 +8,7 @@
 
 ## High-level Tasks
 
-The following are the key milestones identified for this project: 
-
-| Task                                                          |  Time needed |             ETA |
-|:--------------------------------------------------------------|-------------:|----------------:|
-| Gather representative data set for training and evaluation    |      8 hours |          Nov  8 |
-| Parsing engine to parse resumes and job descriptions          |     20 hours |          Nov 15 |
-| Progress report                                               |      2 hours |          Nov 15 |
-| Analysis engine to analyze resumes                            |     30 hours |          Nov 22 |
-| Scoring engine to match resumes to provided job description   |     30 hours |          Nov 29 |
-| Basic UI to search for resumes matching a job description     |     24 hours |          Dec  5 |
-| Software documentation                                        |      8 hours |          Dec  9 |
-| **Total**                                                     |**122 hours** |                 |
-
-Please use the the following architecture diagram as a reference for the discussion below:
-
-![architecture-diagram](doc/architecture-diagram.png)
+Please refer to the high-level tasks identified for this project in the [proposal document](https://github.com/dkrovi2/CourseProject/blob/main/proposal.md#please-justify-that-the-workload-of-your-topic-is-at-least-20--n-hours-n-being-the-total-number-of-students-in-your-team-you-may-list-the-main-tasks-to-be-completed-and-the-estimated-time-cost-for-each-task).
 
 ## Tasks Completed
 
@@ -57,5 +42,6 @@ The following tasks are pending start:
 
 ## Current Challenges
 
-* A thorough analysis on how to give more weight to a skill that occurs less no of times in document, but the candidate worked on those skills for multiple years.
+* A thorough analysis on how to give more weight to a skill that occurs less number of times in a resume, but the candidate worked on those skills for multiple years.
+
 
