@@ -20,11 +20,12 @@ import org.apache.lucene.util.Version;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public class ScoringEngine {
     private static final Logger LOGGER = Logger.getLogger(ScoringEngine.class.getName());
@@ -32,12 +33,12 @@ public class ScoringEngine {
     private static Analyzer analyzer = new SimpleAnalyzer(Version.LUCENE_47);
     private IndexWriter writer;
     private ArrayList<File> queue = new ArrayList<>();
-    private static final String CORPUS_PATH = "/Users/jatinsaxena/IdeaProjects/CourseProject/code/parsing-engine/src/main/resources/CORPUS";
 
     ScoringEngine() throws IOException {
-        FSDirectory dir = FSDirectory.open(new File(CORPUS_PATH));
+        FSDirectory dir = FSDirectory.open(new File(getClass().getResource("/CORPUS").getFile()));
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_47,analyzer);
         writer = new IndexWriter(dir, config);
+        //TODO - Implement Similarity
     }
 
     public void indexFilesDirectory() throws IOException {
@@ -81,13 +82,12 @@ public class ScoringEngine {
 
     }
 
-    public void searchQuery(String userQuery) throws IOException {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(CORPUS_PATH)));
+    public List<Document> searchQuery(String userQuery) throws IOException {
+        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(getClass().getResource("/CORPUS").getFile())));
         IndexSearcher searcher = new IndexSearcher(reader);
         TopScoreDocCollector collector = null;
+        List<Document> resultDocList = new ArrayList<>();
 
-        File docFile = new File(getClass().getResource(".").getFile() + "/ScoreList.txt");
-        FileWriter docFileWriter = new FileWriter(docFile);
         try {
             Query q = new QueryParser(Version.LUCENE_47, "contents", analyzer).parse(userQuery);
             collector = TopScoreDocCollector.create(1000,true); //Scoring for all the documents.
@@ -97,18 +97,16 @@ public class ScoringEngine {
             for (int i = 0; i < Math.min(100, hits.length); ++i) {
                 int docId = hits[i].doc;
                 Document d = searcher.doc(docId);
+                resultDocList.add(d);
                 String filename = d.get("filename");
                 System.out.println("Filename--->>>" + filename + "Score-->>>" + hits[i].score);
-                filename = filename.substring(0, filename.length() - 4);
-                String concatenatedOutput =  filename + "   " + (i + 1) + "   " + hits[i].score + "   " + " LuceneModel\n";
-                docFileWriter.write(concatenatedOutput);
             }
-
         }
         catch (Exception e) {
          e.printStackTrace();
         }
-        docFileWriter.close();
+        System.out.println("Result Document-->>" + resultDocList);
+        return resultDocList;
     }
 
     private void addFiles(File file) {
@@ -136,7 +134,7 @@ public class ScoringEngine {
    public static void main(String args[]) throws IOException {
        ScoringEngine scoringEngine = new ScoringEngine();
        scoringEngine.indexFilesDirectory();
-       scoringEngine.searchQuery("what articles exist which deal with tss time sharing system  an operating system for ibm computers \n");
+       scoringEngine.searchQuery("java \n");
    }
 
 
