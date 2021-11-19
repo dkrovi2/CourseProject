@@ -33,15 +33,17 @@
 
     The following are the steps and key milestones for this project: 
 
-    | Task                                                          |  Time needed | Completion date |
+    | Task                                                          |  Time needed |             ETA |
     |:--------------------------------------------------------------|-------------:|----------------:|
+    | Gather representative data set for training and evaluation    |      8 hours |          Nov  8 |
     | Parsing engine to parse resumes and job descriptions          |     20 hours |          Nov 15 |
     | Progress report                                               |      2 hours |          Nov 15 |
     | Analysis engine to analyze resumes                            |     30 hours |          Nov 22 |
     | Scoring engine to match resumes to provided job description   |     30 hours |          Nov 29 |
     | Basic UI to search for resumes matching a job description     |     24 hours |          Dec  5 |
     | Software documentation                                        |      8 hours |          Dec  9 |
-    | **Total**                                                     |**114 hours** |                 |
+    | **Total**                                                     |**122 hours** |                 |
+
 
 # Contributors
 
