@@ -12,25 +12,36 @@ plugins {
 }
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    // Use JUnit Jupiter API for testing.
-    implementation 'commons-lang:commons-lang:2.6'
+
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'commons-io:commons-io:2.11.0'
+
+
+    // PDF Parsing
+    implementation 'org.apache.pdfbox:pdfbox:2.0.24'
+
+    // DOC Parsing
     implementation 'edu.stanford.nlp:stanford-corenlp:4.3.1'
     implementation 'edu.stanford.nlp:stanford-corenlp:4.3.1:models'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.2'
     implementation 'org.apache.poi:poi-ooxml:4.1.2'
 
+    // Use JUnit Jupiter Engine for testing.
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+
+    // Lombok.
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-    // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-
+    // Logback
+    implementation 'ch.qos.logback:logback-classic:1.2.7'
 }
 
 application {
