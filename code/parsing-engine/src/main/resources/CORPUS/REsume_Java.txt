@@ -1,6 +1,5 @@
-Java 5 years
-Javascript 10 years
-Spark 5 years
-==================
-
-Java 2 years
+Java 15
+Javascript 2
+Spark 5
+ExtJS 1
+Angular 1

@@ -1,5 +1,4 @@
-ExtJS 5 years
-Angular 10 years
-Java 2 years
-Javascript 2 years
-Javascript 2 years
+ExtJS 5
+Angular 10
+Java 2
+Javascript 2
