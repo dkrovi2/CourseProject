@@ -1,18 +1,15 @@
-package analysisengine;
+package edu.illinois.phantom.analysisengine;
 
+import edu.illinois.phantom.model.UserQuery;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.IntField;
-import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -20,30 +17,27 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
 public class ScoringEngine {
     private static final Logger LOGGER = Logger.getLogger(ScoringEngine.class.getName());
 
-    private static Analyzer analyzer = new SimpleAnalyzer(Version.LUCENE_47);
+    private static Analyzer analyzer = new SimpleAnalyzer();
     private IndexWriter writer;
     private ArrayList<File> queue = new ArrayList<>();
 
     ScoringEngine() throws IOException {
-        FSDirectory dir = FSDirectory.open(new File(getClass().getResource("/CORPUS").getFile()));
-        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_47,analyzer);
+        FSDirectory dir = FSDirectory.open(Paths.get(getClass().getResource("/CORPUS").getFile()));
+        IndexWriterConfig config = new IndexWriterConfig(analyzer);
         writer = new IndexWriter(dir, config);
     }
 
     public void indexFilesDirectory() throws IOException {
 
         addFiles(new File(getClass().getResource("/CORPUS").getFile()));
-
-        int OriginalNumDocs = writer.numDocs();
-
 
 
         queue.forEach(file -> {
@@ -75,10 +69,11 @@ public class ScoringEngine {
 
                     }
                     allSkills = allSkills + skill;
-                    String skills = skill+"_FIELD";
-                    System.out.println("SKill with DUration-->>" + skills + " " + duration);
-                    document.add(new IntField(skills, duration ,Field.Store.YES));
+                    String skills = skill.toUpperCase()+"_FIELD";
+                    //document.add(new LegacyIntField(skills, duration ,Field.Store.YES));
 
+                    document.add(new IntPoint(skills, duration));
+                    document.add(new StoredField(skills,duration));
                     document.add(new StringField("allSkills", allSkills, Field.Store.YES));
                     writer.addDocument(document);
                 }
@@ -88,17 +83,8 @@ public class ScoringEngine {
                 e.printStackTrace();
             }
 
-
-
         });
-        int newNumDocs = writer.numDocs();
 
-        if(OriginalNumDocs == newNumDocs) {
-            LOGGER.log(Level.INFO,"All documents get indexed");
-        }
-        else {
-            LOGGER.log(Level.INFO,"{} documents get indexed",OriginalNumDocs-newNumDocs);
-        }
         queue.clear();
         writer.commit();
         writer.close();
@@ -106,11 +92,15 @@ public class ScoringEngine {
 
     }
 
-    public Set<String> searchQuery(String userQuery) throws IOException {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(getClass().getResource("/CORPUS").getFile())));
+    public Set<String> searchQuery(List<UserQuery> userQuery) throws IOException {
+        IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(getClass().getResource("/CORPUS").getFile())));
         IndexSearcher searcher = new IndexSearcher(reader);
 
-        Query query = NumericRangeQuery.newIntRange("Java_FIELD",5,50,true,true);
+//        Query query = IntRange.newWithinQuery("Java_FIELD",new int[] {5},new int[] {Integer.MAX_VALUE});
+//        Query query2 = IntRange.newWithinQuery("Kafka_FIELD", new int[] {1},new int[] {Integer.MAX_VALUE});
+//        Query query3 = IntRange.newWithinQuery("Angular_FIELD", new int[] {10},new int[] {Integer.MAX_VALUE});
+
+        /*Query query = NumericRangeQuery.newIntRange("Java_FIELD",5,50,true,true);
         Query query2 = NumericRangeQuery.newIntRange("Kafka_FIELD", 1,30,true,true);
         Query query3 = NumericRangeQuery.newIntRange("Angular_FIELD", 10,100,true,true);
         query.setBoost((float) 2.0);
@@ -120,12 +110,29 @@ public class ScoringEngine {
         booleanQuery.add(query2, BooleanClause.Occur.SHOULD);
         booleanQuery.add(query3, BooleanClause.Occur.SHOULD);
 
+*/
+        BooleanQuery.Builder builder = new BooleanQuery.Builder();
+        userQuery.forEach(inputQuery -> {
+            Query query;
+            if(inputQuery.isMandatorySkill()) {
+                 query = new BoostQuery(IntPoint.newRangeQuery(inputQuery.getSkill(), inputQuery.getMinExperience()
+                        , Integer.MAX_VALUE), (float) inputQuery.getMinExperience());
+            }
+            else {
+                query = IntPoint.newRangeQuery(inputQuery.getSkill(), inputQuery.getMinExperience()
+                        , Integer.MAX_VALUE);
+            }
+
+            builder.add(query,BooleanClause.Occur.SHOULD);
+        });
+
+        BooleanQuery booleanQuery = builder.build();
 
         TopScoreDocCollector collector = null;
         HashSet<String> resultset = new LinkedHashSet<>();
 
         try {
-            collector = TopScoreDocCollector.create(100,true); //Scoring for all the documents.
+            collector = TopScoreDocCollector.create(100,Integer.MAX_VALUE); //Scoring for all the documents.
             searcher.search(booleanQuery, collector);
             ScoreDoc[] hits = collector.topDocs().scoreDocs;
 
@@ -136,9 +143,6 @@ public class ScoringEngine {
                 String location = d.get("location");
                 System.out.println("File location--->>>" + location + " Score-->>>" + hits[i].score);
             }
-            resultset.forEach(doc -> {
-                System.out.println("New location--->>>" + doc);
-            });
         }
         catch (Exception e) {
          e.printStackTrace();
@@ -172,7 +176,17 @@ public class ScoringEngine {
    public static void main(String args[]) throws IOException {
        ScoringEngine scoringEngine = new ScoringEngine();
        scoringEngine.indexFilesDirectory();
-       scoringEngine.searchQuery("Java");
+       //TODO: Remove Later
+       UserQuery query1 = new UserQuery("JAVA",15,true);
+       UserQuery query2 = new UserQuery("KAFKA",5,true);
+       UserQuery query3 = new UserQuery("ANGULAR",2,false);
+
+       ArrayList<UserQuery> userQueryArrayList = new ArrayList<>();
+       userQueryArrayList.add(query1);
+       userQueryArrayList.add(query2);
+       userQueryArrayList.add(query3);
+
+       scoringEngine.searchQuery(userQueryArrayList);
    }
    
 }
