@@ -3,12 +3,102 @@
  */
 package edu.illinois.phantom;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import edu.illinois.phantom.model.Experience;
+import edu.illinois.phantom.wordParser.ResumeParser;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+
+import java.io.*;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import static edu.illinois.phantom.wordParser.Constants.*;
+
 public class App {
     public String getGreeting() {
         return "Hello World!";
     }
 
-    public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+    public static void main(String[] args) throws IOException {
+
+        ResumeParser resumeParser = new ResumeParser();
+        //Creating a File object for directory
+        ClassLoader classLoader = App.class.getClassLoader();
+        File directoryPath = new File(classLoader.getResource("Resumes").getFile());
+        //List of all files and directories
+        File filesList[] = directoryPath.listFiles();
+        List<ObjectNode> experienceObjectList = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        System.out.println("Parsing resumes...");
+        for(File file : filesList) {
+            InputStream targetStream = new FileInputStream(file);
+            try (XWPFDocument doc = new XWPFDocument(Objects.requireNonNull(targetStream))) {
+                List<XWPFParagraph> list = doc.getParagraphs();
+                List<String> textList = new ArrayList<>();
+                StringBuilder sb = new StringBuilder();
+                for (XWPFParagraph paragraph : list) {
+                    String text = paragraph.getText();
+                    String lowertext = StringUtils.lowerCase(text);
+                    if (pattern4.matcher(lowertext).find()) {
+                        textList.add(sb.toString());
+                        sb = new StringBuilder();
+                        sb.append(lowertext);
+                    } else if (pattern3.matcher(lowertext).find()) {
+                        textList.add(sb.toString());
+                        sb = new StringBuilder();
+                        sb.append(lowertext);
+                    } else if (pattern2.matcher(lowertext).find()) {
+                        textList.add(sb.toString());
+                        sb = new StringBuilder();
+                        sb.append(lowertext);
+                    } else if (pattern1.matcher(lowertext).find()) {
+                        textList.add(sb.toString());
+                        sb = new StringBuilder();
+                        sb.append(lowertext);
+                    } else if (pattern5.matcher(lowertext).find()) {
+                        textList.add(sb.toString());
+                        sb = new StringBuilder();
+                        sb.append(lowertext);
+                    }
+                    else sb.append(lowertext);
+                }
+                if (sb != null && sb.length() > 0)
+                    textList.add(sb.toString());
+                ArrayNode skillArray = objectMapper.createArrayNode();
+
+                for (String text : textList) {
+                    Optional<List<Experience>> optionalList = resumeParser.parseResume(text);
+                    if (optionalList.isPresent()) {
+                        List<Experience> experienceList = optionalList.get();
+                        for (Experience e : experienceList) {
+                            String s = objectMapper.writeValueAsString(e);
+                            skillArray.add(s);
+                        }
+                    }
+                }
+//            System.out.println(skillArray);
+                ObjectNode experienceObject = objectMapper.createObjectNode();
+// It is similar to map put method. put method is overloaded to accept different types of data
+// String as field value
+                experienceObject.put("location", file.getAbsolutePath());
+                experienceObject.put("skills", skillArray);
+                experienceObjectList.add(experienceObject);
+            } catch (IOException e) {
+                System.err.println("Error reading file " + e.getMessage());
+
+            }
+        }
+        System.out.println("Finished parsing resumes...");
+        System.out.println("Writing parsed data...");
+        objectMapper.writeValue(Paths.get("experiences.json").toFile(), experienceObjectList);
+        System.out.println("Finished");
+
     }
 }
