@@ -1,0 +1,21 @@
+{
+  "location": "/Resume_BackEnd.json",
+  "skills": [
+    {
+      "skill":"Java",
+      "duration":50
+    },
+    {
+      "skill": "MSSQL",
+      "duration": 40
+    },
+    {
+      "skill":"API",
+      "duration":10
+    },
+    {
+      "skill":"Kafka",
+      "duration":15
+    }
+  ]
+}
