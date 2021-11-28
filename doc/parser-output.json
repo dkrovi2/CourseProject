@@ -1,0 +1,27 @@
+{
+  "location": "<relative location of the resume>",
+  "experience":[
+    {
+      "skill": "java",
+      "durationInMonths": "12"
+    },
+    {
+      "skill": "spark",
+      "durationInMonths": "18"
+    },
+    {
+      "skill": "java",
+      "durationInMonths": "18"
+    }
+  ],
+  "education":[
+    {
+      "skill": "distributed systems",
+      "durationInMonths": "6"
+    },
+    {
+      "skill": "R",
+      "durationInMonths": "6"
+    }
+  ]
+}
