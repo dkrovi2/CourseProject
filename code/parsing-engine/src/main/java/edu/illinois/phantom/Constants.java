@@ -1,4 +1,4 @@
-package edu.illinois.phantom.wordparser;
+package edu.illinois.phantom;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -9,11 +9,10 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
     mavenCentral()
 }
 
@@ -55,10 +54,13 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'com.illinois.phantom.App'
+    mainClass = 'edu.illinois.phantom.Main'
 }
 
 tasks.named('test') {
     // Use junit platform for unit tests.
     useJUnitPlatform()
 }
+
+mainClassName = 'edu.illinois.phantom.Main'
+build.dependsOn shadowJar

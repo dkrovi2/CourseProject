@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <logger name="edu.stanford.nlp.pipeline" level="warn">
+    <logger name="edu.stanford.nlp" level="error">
         <appender-ref ref="STDOUT"/>
     </logger>
 
