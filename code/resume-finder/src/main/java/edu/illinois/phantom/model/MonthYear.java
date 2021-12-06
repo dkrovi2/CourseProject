@@ -1,6 +1,6 @@
 package edu.illinois.phantom.model;
 
-import static edu.illinois.phantom.Constants.monthToInt;
+import static edu.illinois.phantom.util.Constants.monthToInt;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.Period;

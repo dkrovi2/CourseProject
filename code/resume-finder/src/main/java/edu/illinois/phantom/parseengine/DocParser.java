@@ -1,10 +1,10 @@
-package edu.illinois.phantom;
+package edu.illinois.phantom.parseengine;
 
-import static edu.illinois.phantom.Constants.pattern1;
-import static edu.illinois.phantom.Constants.pattern2;
-import static edu.illinois.phantom.Constants.pattern3;
-import static edu.illinois.phantom.Constants.pattern4;
-import static edu.illinois.phantom.Constants.pattern5;
+import static edu.illinois.phantom.util.Constants.pattern1;
+import static edu.illinois.phantom.util.Constants.pattern2;
+import static edu.illinois.phantom.util.Constants.pattern3;
+import static edu.illinois.phantom.util.Constants.pattern4;
+import static edu.illinois.phantom.util.Constants.pattern5;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,7 +27,8 @@ public class DocParser {
 
   public static final DocParser INSTANCE = new DocParser();
 
-  private DocParser() {}
+  private DocParser() {
+  }
 
   public Optional<List<String>> extractTextFromFile(File file) {
     try {
@@ -42,7 +43,7 @@ public class DocParser {
       }
     } catch (IOException ioe) {
       throw new DocParseException(
-          "Exception while extracting text from file (" + file + "): " + ioe.getMessage(), ioe);
+        "Exception while extracting text from file (" + file + "): " + ioe.getMessage(), ioe);
     }
   }
 
@@ -64,10 +65,10 @@ public class DocParser {
 
   private static boolean textMatchesPattern(final String lowerCaseText) {
     return pattern4.matcher(lowerCaseText).find()
-        || pattern3.matcher(lowerCaseText).find()
-        || pattern2.matcher(lowerCaseText).find()
-        || pattern1.matcher(lowerCaseText).find()
-        || pattern5.matcher(lowerCaseText).find();
+      || pattern3.matcher(lowerCaseText).find()
+      || pattern2.matcher(lowerCaseText).find()
+      || pattern1.matcher(lowerCaseText).find()
+      || pattern5.matcher(lowerCaseText).find();
   }
 
   private static List<String> getResumeSectionsFromContent(final List<String> lines) {

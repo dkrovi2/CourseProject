@@ -1,196 +1,141 @@
 package edu.illinois.phantom.analysisengine;
 
-import edu.illinois.phantom.model.UserQuery;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
-import org.apache.lucene.document.*;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.logging.Logger;
-
-
+@Slf4j
 public class ScoringEngine {
-    private static final Logger LOGGER = Logger.getLogger(ScoringEngine.class.getName());
 
-    private static Analyzer analyzer = new SimpleAnalyzer();
-    private IndexWriter writer;
-    private ArrayList<File> queue = new ArrayList<>();
+  private static final Analyzer analyzer = new SimpleAnalyzer();
 
-    private String corpusPath;
+  private final List<File> queue = new ArrayList<>();
 
-    public ScoringEngine(String dirPath) throws IOException {
-        //FSDirectory dir = FSDirectory.open(Paths.get(getClass().getResource("/CORPUS").getFile()));
+  private final String corpusPath;
+  private final String indexLocation;
 
-        corpusPath =  dirPath;
-        FSDirectory dir = FSDirectory.open(Paths.get(corpusPath));
+  public ScoringEngine(final String corpusPath, final String indexLocation) {
+    this.corpusPath = corpusPath;
+    this.indexLocation = indexLocation;
+  }
 
-        IndexWriterConfig config = new IndexWriterConfig(analyzer);
-        writer = new IndexWriter(dir, config);
-    }
+  public void indexFilesDirectory() throws IOException {
 
-    public void indexFilesDirectory() throws IOException {
+    addFiles(new File(corpusPath));
 
-        addFiles(new File(corpusPath));
-
-
-        queue.forEach(file -> {
-            try {
-
-                FileReader fr = new FileReader(file);
-                Object obj = new JSONParser().parse(fr);
-                JSONObject jo = (JSONObject) obj;
-                String location = (String) jo.get("location");
-                JSONArray ja = (JSONArray) jo.get("skills");
-                String allSkills = " ";
-                Iterator itr2 = ja.iterator();
-                Document document = new Document();
-                document.add(new StringField("path", file.getPath(), Field.Store.YES));
-                document.add(new StringField("filename", file.getName(), Field.Store.YES));
-                document.add(new StringField("location", location, Field.Store.YES));
-                while (itr2.hasNext()) {
-                    Iterator<Map.Entry> itr1 = ((Map) itr2.next()).entrySet().iterator();
-                    int duration=0;
-                    String skill = null;
-                    while (itr1.hasNext()) {
-                        Map.Entry pair = itr1.next();
-                        if(pair.getKey().toString().equalsIgnoreCase("duration")) {
-                            duration = Integer.parseInt(pair.getValue().toString());
-                        }
-                        if(pair.getKey().toString().equalsIgnoreCase("skill")) {
-                            skill = pair.getValue().toString();
-                        }
-
-                    }
-                    allSkills = allSkills + skill;
-                    String skills = skill.toUpperCase()+"_FIELD";
-                    //document.add(new LegacyIntField(skills, duration ,Field.Store.YES));
-
-                    document.add(new IntPoint(skills, duration));
-                    document.add(new StoredField(skills,duration));
-                    document.add(new StringField("allSkills", allSkills, Field.Store.YES));
-                    writer.addDocument(document);
-                }
-                fr.close();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        });
-
-        queue.clear();
-        writer.commit();
-        writer.close();
-
-
-    }
-
-    public Set<String> searchQuery(List<UserQuery> userQuery) throws IOException {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(corpusPath)));
-        IndexSearcher searcher = new IndexSearcher(reader);
-
-        BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        userQuery.forEach(inputQuery -> {
-            Query query;
-            if(inputQuery.isMandatorySkill()) {
-                 query = new BoostQuery(IntPoint.newRangeQuery(inputQuery.getSkill(), inputQuery.getMinExperience()
-                        , Integer.MAX_VALUE), (float) inputQuery.getMinExperience());
-            }
-            else {
-                query = IntPoint.newRangeQuery(inputQuery.getSkill(), inputQuery.getMinExperience()
-                        , Integer.MAX_VALUE);
-            }
-
-            builder.add(query,BooleanClause.Occur.SHOULD);
-        });
-
-        BooleanQuery booleanQuery = builder.build();
-
-        TopScoreDocCollector collector = null;
-        HashSet<String> resultset = new LinkedHashSet<>();
-
+    IndexWriterConfig config = new IndexWriterConfig(analyzer);
+    try (FSDirectory indexDir = FSDirectory.open(Paths.get(indexLocation));
+         IndexWriter writer = new IndexWriter(indexDir, config)) {
+      queue.forEach(file -> {
         try {
-            collector = TopScoreDocCollector.create(100,Integer.MAX_VALUE); //Scoring for all the documents.
-            searcher.search(booleanQuery, collector);
-            ScoreDoc[] hits = collector.topDocs().scoreDocs;
-
-            for (int i = 0; i < Math.min(50, hits.length); ++i) {
-                int docId = hits[i].doc;
-                Document d = searcher.doc(docId);
-                resultset.add(d.get("location"));
-                String location = d.get("location");
-               // System.out.println("File location--->>>" + location + " Score-->>>" + hits[i].score);
-            }
+          FileReader fr = new FileReader(file);
+          Object obj = new JSONParser().parse(fr);
+          JSONObject jo = (JSONObject) obj;
+          addDocumentToWriter(file, (String) jo.get("location"), (JSONArray) jo.get("skills"), writer);
+          fr.close();
+        } catch (Exception e) {
+          e.printStackTrace();
         }
-        catch (Exception e) {
-         e.printStackTrace();
-        }
-        System.out.println("Result Document-->>" + resultset);
 
-        /* just to test it out
-        resultset = new HashSet<String>();
-        resultset.add("Location 1");
-        resultset.add("Location 2");
-        */
-        return resultset;
+      });
+      writer.commit();
+    }
+    queue.clear();
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private void addDocumentToWriter(
+    final File file,
+    final String location,
+    final JSONArray ja,
+    final IndexWriter writer) throws IOException {
+    String allSkills = " ";
+    Iterator itr2 = ja.iterator();
+    Document document = new Document();
+    document.add(new StringField("path", file.getPath(), Field.Store.YES));
+    document.add(new StringField("filename", file.getName(), Field.Store.YES));
+    document.add(new StringField("location", location, Field.Store.YES));
+    while (itr2.hasNext()) {
+      Iterator<Map.Entry> itr1 = ((Map) itr2.next()).entrySet().iterator();
+      int duration = 0;
+      String skill = null;
+      while (itr1.hasNext()) {
+        Map.Entry pair = itr1.next();
+        if (pair.getKey().toString().equalsIgnoreCase("duration")) {
+          duration = Integer.parseInt(pair.getValue().toString());
+        }
+        if (pair.getKey().toString().equalsIgnoreCase("skill")) {
+          skill = pair.getValue().toString();
+        }
+
+      }
+      if (null != skill) {
+        allSkills = allSkills + " " + skill;
+        String skills = skill.toUpperCase() + "_FIELD";
+        document.add(new IntPoint(skills, duration));
+        document.add(new StoredField(skills, duration));
+      }
+    }
+    document.add(new StringField("allSkills", allSkills, Field.Store.YES));
+    writer.addDocument(document);
+    log.info("Added {} to the scoring index, with skills:{}", file, allSkills);
+
+  }
+
+  private void addFiles(File file) {
+
+    if (!file.exists()) {
+      System.out.println(file + " does not exist.");
+    }
+    if (file.isDirectory()) {
+      File[] files = file.listFiles();
+      if (files != null) {
+        Arrays.stream(files).forEach(this::addFiles);
+      }
+    } else {
+      String filename = file.getName().toLowerCase();
+      // ===================================================
+      // Only index text files
+      // ===================================================
+      if (filename.endsWith(".json")) {
+        queue.add(file);
+      } else {
+        System.out.println("Skipped " + filename);
+      }
+    }
+  }
+
+  public static void main(String[] args) throws IOException {
+
+    if (args.length == 0 || "help".equalsIgnoreCase(args[0]) || args.length != 2) {
+      System.out.println(
+        "Usage: java -cp resume-finder-all.jar edu.illinois.phantom.analysisengine.ScoringEngine " +
+          "<Directory-where-json-files-are-located> <Directory to store index");
+      return;
     }
 
-    private void addFiles(File file) {
+    ScoringEngine scoringEngine = new ScoringEngine(args[0], args[1]);
+    scoringEngine.indexFilesDirectory();
+  }
 
-        if (!file.exists()) {
-            System.out.println(file + " does not exist.");
-        }
-        if (file.isDirectory()) {
-            for (File f : file.listFiles()) {
-                addFiles(f);
-            }
-        } else {
-            String filename = file.getName().toLowerCase();
-            // ===================================================
-            // Only index text files
-            // ===================================================
-            if (filename.endsWith(".json")) {
-                queue.add(file);
-            } else {
-                System.out.println("Skipped " + filename);
-            }
-        }
-    }
-
-   public static void main(String args[]) throws IOException {
-
-       if (args.length ==0 || (args.length != 0 && "help".equalsIgnoreCase(args[0]))) {
-           System.out.println(
-                   "Usage: java edu.illinois.phantom.analysisengine.ScoringEngine <Directory-where-json-files-are-located>");
-           return;
-       }
-
-       ScoringEngine scoringEngine = new ScoringEngine(args[0]);
-       scoringEngine.indexFilesDirectory();
-       //TODO: Remove Later
-       UserQuery query1 = new UserQuery("JAVA",15,true);
-       UserQuery query2 = new UserQuery("KAFKA",5,true);
-       UserQuery query3 = new UserQuery("ANGULAR",2,false);
-
-       ArrayList<UserQuery> userQueryArrayList = new ArrayList<>();
-       userQueryArrayList.add(query1);
-       userQueryArrayList.add(query2);
-       userQueryArrayList.add(query3);
-
-       scoringEngine.searchQuery(userQueryArrayList);
-   }
-   
 }

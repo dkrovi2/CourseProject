@@ -1,4 +1,4 @@
-package edu.illinois.phantom;
+package edu.illinois.phantom.parseengine;
 
 public class DocParseException extends RuntimeException {
   public DocParseException(final String message) {

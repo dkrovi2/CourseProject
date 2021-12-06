@@ -1,4 +1,4 @@
-package edu.illinois.phantom;
+package edu.illinois.phantom.util;
 
 import java.util.HashMap;
 import java.util.Map;

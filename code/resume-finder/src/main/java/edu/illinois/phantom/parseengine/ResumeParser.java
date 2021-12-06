@@ -1,9 +1,9 @@
-package edu.illinois.phantom;
+package edu.illinois.phantom.parseengine;
 
-import static edu.illinois.phantom.Constants.pattern1;
-import static edu.illinois.phantom.Constants.pattern2;
-import static edu.illinois.phantom.Constants.pattern3;
-import static edu.illinois.phantom.Constants.pattern4;
+import static edu.illinois.phantom.util.Constants.pattern1;
+import static edu.illinois.phantom.util.Constants.pattern2;
+import static edu.illinois.phantom.util.Constants.pattern3;
+import static edu.illinois.phantom.util.Constants.pattern4;
 import edu.illinois.phantom.model.MonthYear;
 import edu.illinois.phantom.model.Resume;
 import edu.illinois.phantom.model.SkillInfo;
@@ -44,20 +44,20 @@ public class ResumeParser {
   private ResumeParser() {
     try (InputStream is = ResumeParser.class.getResourceAsStream(SKILLS_CSV)) {
       skills.addAll(
-          new HashSet<>(
-              IOUtils.readLines(Objects.requireNonNull(is), Charset.defaultCharset()).stream()
-                  .map(s -> Arrays.asList(s.split(",")))
-                  .flatMap(List::stream)
-                  .collect(Collectors.toList())));
-      System.out.println("Read skills to cache " + skills);
+        new HashSet<>(
+          IOUtils.readLines(Objects.requireNonNull(is), Charset.defaultCharset()).stream()
+            .map(s -> Arrays.asList(s.split(",")))
+            .flatMap(List::stream)
+            .collect(Collectors.toList())));
+      log.debug("Read skills to cache: {}", skills);
     } catch (IOException e) {
       System.err.println("Error loading GAIA cache " + e.getMessage());
     }
 
     try (InputStream is = ResumeParser.class.getResourceAsStream(STOPWORDS_TXT)) {
       stopWords.addAll(
-          new HashSet<>(IOUtils.readLines(Objects.requireNonNull(is), Charset.defaultCharset())));
-      System.out.println("Read stopWords to cache " + stopWords);
+        new HashSet<>(IOUtils.readLines(Objects.requireNonNull(is), Charset.defaultCharset())));
+      log.debug("Read stopWords to cache: {}", stopWords);
     } catch (IOException e) {
       System.err.println("Error loading stopwords cache " + e.getMessage());
     }
@@ -66,42 +66,44 @@ public class ResumeParser {
   public Optional<Resume> parseResumeFile(final File file) {
     log.info("Parsing resume file at {}", file.toString());
     return DocParser.INSTANCE
-        .extractTextFromFile(file)
-        .map(
-            sections ->
-                Resume.builder()
-                    .location(file.getAbsolutePath())
-                    .skills(
-                        sections.stream()
-                            .map(this::parseResume)
-                            .flatMap(List::stream)
-                            .collect(
-                                Collectors.groupingBy(
-                                    SkillInfo::getSkill,
-                                    Collectors.summingInt(SkillInfo::getDuration)))
-                            .entrySet()
-                            .stream()
-                            .map(
-                                entry ->
-                                    SkillInfo.builder()
-                                        .skill(entry.getKey())
-                                        .duration(entry.getValue())
-                                        .build())
-                            .sorted(Comparator.comparing(SkillInfo::getSkill))
-                            .collect(Collectors.toList()))
-                    .build());
+      .extractTextFromFile(file)
+      .map(
+        sections ->
+          Resume.builder()
+            .location(file.getAbsolutePath())
+            .skills(
+              sections.stream()
+                .map(this::parseResume)
+                .flatMap(List::stream)
+                .collect(
+                  Collectors.groupingBy(
+                    SkillInfo::getSkill,
+                    Collectors.summingInt(SkillInfo::getDuration)))
+                .entrySet()
+                .stream()
+                .map(
+                  entry ->
+                    SkillInfo.builder()
+                      .skill(entry.getKey())
+                      .duration(entry.getValue())
+                      .build())
+                .sorted(Comparator.comparing(SkillInfo::getSkill))
+                .collect(Collectors.toList()))
+            .build());
   }
 
-  /** Helper function to extract skills from spacy nlp text return list of skills extracted */
+  /**
+   * Helper function to extract skills from spacy nlp text return list of skills extracted
+   */
   public List<SkillInfo> parseResume(String text) {
     Optional<Integer> durationOptional = extractDuration(text);
     return durationOptional
-        .map(
-            duration ->
-                extractSkills(text).stream()
-                    .map(s -> SkillInfo.builder().skill(s).duration(duration).build())
-                    .collect(Collectors.toList()))
-        .orElse(new ArrayList<>());
+      .map(
+        duration ->
+          extractSkills(text).stream()
+            .map(s -> SkillInfo.builder().skill(s).duration(duration).build())
+            .collect(Collectors.toList()))
+      .orElse(new ArrayList<>());
   }
 
   private Set<String> extractSkills(String text) {
@@ -119,19 +121,21 @@ public class ResumeParser {
     pipeline.annotate(doc);
     // display tokens
     Set<String> skillSet =
-        doc.tokens().stream()
-            .map(CoreLabel::word)
-            .filter(token -> skills.contains(token) && !stopWords.contains(token))
-            .collect(Collectors.toSet());
+      doc.tokens().stream()
+        .map(CoreLabel::word)
+        .filter(token -> skills.contains(token) && !stopWords.contains(token))
+        .collect(Collectors.toSet());
 
     StringUtils.getNgramsFromTokens(doc.tokens(), 1, 3).stream()
-        .filter(ngram -> skills.contains(ngram) && !skillSet.contains(ngram))
-        .forEach(skillSet::add);
+      .filter(ngram -> skills.contains(ngram) && !skillSet.contains(ngram))
+      .forEach(skillSet::add);
 
     return skillSet;
   }
 
-  /** Helper function to extract skills from spacy nlp text return list of skills extracted */
+  /**
+   * Helper function to extract skills from spacy nlp text return list of skills extracted
+   */
   private Optional<Integer> extractDuration(String lowertext) {
     try {
       String trim = org.apache.commons.lang3.StringUtils.trim(lowertext);
@@ -142,7 +146,7 @@ public class ResumeParser {
 
       if (matcher4.find()) {
         MonthYear startMonthYear =
-            new MonthYear(matcher4.group("startMonth"), matcher4.group("startYear"));
+          new MonthYear(matcher4.group("startMonth"), matcher4.group("startYear"));
         MonthYear endMonthYear = new MonthYear("present", matcher4.group("endYear"));
         int diffMonths = startMonthYear.diffMonths(endMonthYear);
         return Optional.of(diffMonths);
@@ -187,9 +191,9 @@ public class ResumeParser {
         } else return Optional.of(0);
       } else if (matcher1.find()) {
         MonthYear startMonthYear =
-            new MonthYear(matcher1.group("startMonth"), matcher1.group("startYear"));
+          new MonthYear(matcher1.group("startMonth"), matcher1.group("startYear"));
         MonthYear endMonthYear =
-            new MonthYear(matcher1.group("endMonth"), matcher1.group("endYear"));
+          new MonthYear(matcher1.group("endMonth"), matcher1.group("endYear"));
         int diffMonths = startMonthYear.diffMonths(endMonthYear);
         return Optional.of(diffMonths);
       }

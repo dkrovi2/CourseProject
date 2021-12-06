@@ -1,4 +1,4 @@
-package edu.illinois.phantom.UI;
+package edu.illinois.phantom.ui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
