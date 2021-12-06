@@ -1,5 +1,0 @@
-Java 15
-Javascript 2
-Spark 5
-ExtJS 1
-Angular 1

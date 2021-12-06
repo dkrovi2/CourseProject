@@ -1,4 +1,0 @@
-ExtJS 5
-Angular 10
-Java 2
-Javascript 2
