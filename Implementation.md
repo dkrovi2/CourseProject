@@ -50,16 +50,40 @@ A JSON file is created for each resume processed by the parsing engine. All the 
 
 The Scoring engine takes over from here.
 
-### Scoring Engine
+### Scoring or Indexing Engine
+
+Apache Lucene library has been used to do the indexing and searching the resume according to the provided user query. All the json files which got generated from parsing engine will get indexed. Document indexing consists of first constructing a document that contains the fields to be indexed or stored, then adding that document to the index.
+
+Document will be created with below fields:
 
 
+
+**Field**				**Value**
+
+**Path** : Path of the json file.
+
+**Filename** :	Json filename.
+
+**Location** :	 		Location field from json file.
+
+**skillname+_FIELD** : 	Field name will get generated dynamically with skill and duration as value.
+
+**allSkills**	: 		String contains all the skills.
+
+Once the document get created,this will be added to index.
 
 ### Search Engine
 
+The search function takes a search query and returns a set of documents ranked by relevancy with documents most similar to the query having the highest score.
+
+User can provide multiple skill, minimum no of experience and boolean flag for mandatory skill in the form of list to search function.
+
+Search function will build the query using BooleanQuery. BoostQuery has been used for mandatory skills so that more weightage should be given to the resume which has mandatory skills. RangeQuery has been used so that resume which qualify for minimum experience will be considered for search. This query will run against the index document and it will return the location of resume in descending order of their score.
 
 ### Search UI
 
 #### Overview of the code
+
 
 The GUI for the Resume Finder makes it easy to provide input for the needed skills and view output for the results (in the form of a list containing names of the Resume files containing the specified skills).
 
