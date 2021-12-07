@@ -80,6 +80,8 @@ resume-finder $
 Sample invocation of parsing engine:
 
 ```bash
+resume-finder $ mkdir artifacts
+resume-finder $ cp -R ../samples/Resumes artifacts/Resumes
 resume-finder $ ./run-parse-engine.sh artifacts/Resumes artifacts/JSON
 Running the parse engine for resumes at artifacts/Resumes. The JSON files for scoring engine will be available at artifacts/JSON
 23:32:26.871 [main] INFO  e.illinois.phantom.parseengine.Main - Parsing resumes...
@@ -101,7 +103,7 @@ resume-finder $
 Sample invocation of parsing engine:
 
 ```bash
-resume-finder] $ ./run-scoring-engine.sh artifacts/Json artifacts/INDEX
+resume-finder $ ./run-scoring-engine.sh artifacts/Json artifacts/INDEX
 Running the scoring engine for JSON files at artifacts/Json. The Lucene Index will be stored at artifacts/INDEX
 23:39:33.668 [main] INFO  e.i.p.analysisengine.ScoringEngine - Added .....
 ...
@@ -113,7 +115,7 @@ resume-finder $
 The `run-search-ui.sh` command does not need any arguments:
 
 ```bash
- $ ./run-search-ui.sh 
+resume-finder $ ./run-search-ui.sh 
 Dec 06, 2021 11:40:29 PM com.sun.javafx.application.PlatformImpl startup
 WARNING: Unsupported JavaFX configuration: classes were loaded from 'unnamed module @1e77e32d'
 ```
