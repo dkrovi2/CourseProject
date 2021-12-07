@@ -84,7 +84,7 @@ The GUI is built using Javafx and the architecture is based on the following cod
 	b) Sets up the SpinnerValuefactory so that the spinner controls have only integer values and a min and max value.
 	c) Associates an event handler with the Button to find resumes matching the skills
 	
-The logic in the event handler consists of:
+6. The logic in the event handler consists of:
 	a) Getting the various values from the controls (skill name, experience etc)
 	b) Getting the index folder name from the textfield
 	c) Converting the experience spinner values from years to months (multiplied by 12)
