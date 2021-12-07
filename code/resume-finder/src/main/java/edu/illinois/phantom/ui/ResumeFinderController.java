@@ -115,6 +115,15 @@ public class ResumeFinderController {
           // Populate results in list view
           ResumeLocationList.getItems().clear();
           for (String location : locations) {
+
+            //take only the file name and remove the folder path
+            int i = location.lastIndexOf("/");
+            if (i==-1){  i = location.lastIndexOf("\\"); }
+
+            i = i+1;
+
+            location = location.substring(i);
+            
             ResumeLocationList.getItems().add(location);
           }
 
