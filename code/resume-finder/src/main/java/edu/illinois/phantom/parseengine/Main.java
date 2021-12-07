@@ -33,10 +33,13 @@ public class Main {
       log.error("{} either does not exist or is not a directory!", directoryPath);
       return;
     }
-    if (!outputPath.exists() && !outputPath.mkdirs()) {
-      log.error("Could not create output directory at {}", outputPath);
-      return;
-
+    if (!outputPath.exists()) {
+      if (!outputPath.mkdirs()) {
+        log.error("Could not create output directory at {}", outputPath);
+        return;
+      } else {
+        log.info("Output directory at {} did not exist. Created it now...", outputPath);
+      }
     }
     File[] filesList = directoryPath.listFiles();
     if (null == filesList || filesList.length == 0) {
@@ -46,23 +49,29 @@ public class Main {
 
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-    long currentTime = System.currentTimeMillis();
     log.info("Parsing resumes...");
-    AtomicInteger counter = new AtomicInteger(1);
     Arrays.stream(filesList)
       // filtering by extension, for example, to parse only PDF resume
       // .filter(file -> file.getName().endsWith(".pdf"))
       .map(ResumeParser.INSTANCE::parseResumeFile)
       .filter(Optional::isPresent)
       .map(Optional::get)
-      .filter(json -> !CollectionUtils.isEmpty(json.getSkills()))
-      .forEach(json -> {
-        File outputFile = Paths.get(outputPath.getAbsolutePath(), currentTime + "-" + counter.getAndIncrement() + ".json").toFile();
+      .filter(resume -> {
+        if (CollectionUtils.isEmpty(resume.getSkills())) {
+          log.warn("No JSON file generated as no skills were found, in {}", resume.getLocation());
+          return false;
+        }
+        return true;
+      })
+      .forEach(resume -> {
+        File inputFile = new File(resume.getLocation());
+        File outputFile = Paths.get(outputPath.getAbsolutePath(), inputFile.getName() + ".json").toFile();
         try {
           if (!outputFile.createNewFile()) {
             throw new DocParseException("Could not create file at " + outputFile.toString());
           }
-          objectMapper.writeValue(outputFile, json);
+          objectMapper.writeValue(outputFile, resume);
+          log.info("Generated JSON file for {} at {}", inputFile.getName(), outputFile);
         } catch (Exception e) {
           log.error("Exception while writing JSON to {}: {}", outputFile, e.getMessage(), e);
         }
