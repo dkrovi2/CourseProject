@@ -123,7 +123,7 @@ public class ResumeFinderController {
             i = i+1;
 
             location = location.substring(i);
-            
+
             ResumeLocationList.getItems().add(location);
           }
 
