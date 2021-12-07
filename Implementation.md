@@ -59,3 +59,44 @@ The Scoring engine takes over from here.
 
 ### Search UI
 
+Overview of the code
+---------------------
+
+The GUI for the Resume Finder makes it easy to provide input for the needed skills and view output for the results (in the form of a list containing names of the Resume files containing the specified skills).
+
+The GUI contains the following components/controls:
+
+1. Index folder (Text Field): This is used to input the folder name where the search index files are present. It gives flexibility to run the same UI for multiple searches by looking only in the specified folder.
+2. Skill name (Text Fields): These are used to input the skill names. Please note that the search is case insensitive. If the skill name is omitted, the other fields for minimum experience and Mandatory checkbox are not considered. An input containing only of blank spaces is consdiered equivalent to leaving the skill field blank.
+3. Min Experience (Spinner): These fields are used to input the minimum experience needed in years. The min experience is a year and you can increment or decrement the experience in single year increments. Please note that this field is only considered when skill field is filled in.
+4. Mandatory (Checkbox): These fields are used to input if the skills is mandatory - thus affecting the search. Please note that this field is only considered when skill field is filled in.
+
+
+Software Implementation
+------------------------
+The GUI is built using Javafx and the architecture is based on the following code components:
+
+1. The java code is under the package: edu.illinois.phantom.ui and the FXML file is under the resources folder edu.illinois.phantom.ui.
+2. Resume_Finder.fxml file: This contains the visual definition of the various GUI controls, as well as their IDs which can then be referrred in the controller code. The primary advantage of the fxml file is that it makes the visual components declarative rather than creating them in the code. The format is a XML file enforcing some of the structure using parent/child tags. The UI consists of a simple decorated window (with minimize/maximize/close buttons) with no Menu bar.
+3. Main.java: Utility class for recalling ResumeFinderApplication - this is needed to make the build jar working due to some JavaFX related nuances.
+4. ResumeFinderApplication.java: This contains the starting code for the UI app. It reads from the FXML file and initiates the UI.
+5. ResumeFinderController.java: This contains the primary logic for the UI interaction. The code:
+	a) Correlates the UI control java objects with their FXML ids (using @FXML tags)
+	b) Sets up the SpinnerValuefactory so that the spinner controls have only integer values and a min and max value.
+	c) Associates an event handler with the Button to find resumes matching the skills
+	
+   The logic in the event handler consists of:
+   	     a) Getting the various values from the controls (skill name, experience etc)
+	     b) Getting the index folder name from the textfield
+	     c) Converting the experience spinner values from years to months (multiplied by 12)
+	     d) Checking if the skill name is populated for each skill textfield and only then considering the remaining values from the controls
+	     e) Creating a list of UserQuery objects - each containing the skill details
+	     f) Performing a search by creating a edu.illinois.phantom.searchengine.SearchEngine object and passing on the list in the above step
+	     g) Getting the results (locations of matching resumes) and using substring to discard the folder path and only taking the Resume file name
+	     h) Clearing the Listbox for the results in the UI and adding the results (Resume names) to the Listbox
+
+
+Important Notes for Usage
+--------------------------
+
+Due to the nature of the UI libraries across multiple OS, we have created two OS specific builds - one for Mac OS, and one for Windows OS. Please use the platform specific jar to run the application. Alternatively, you can build the specific build/jar file for your OS using "gradle build".
