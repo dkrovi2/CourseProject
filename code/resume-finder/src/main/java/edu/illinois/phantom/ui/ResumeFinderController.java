@@ -82,9 +82,9 @@ public class ResumeFinderController {
         String skill3 = SkillTextfield3.getText().trim().replaceAll("\\s{2,}", " ");
 
         // Get min experience
-        Integer exp1 = ExpSpinner1.getValue();
-        Integer exp2 = ExpSpinner2.getValue();
-        Integer exp3 = ExpSpinner3.getValue();
+        Integer exp1 = ExpSpinner1.getValue() * 12;
+        Integer exp2 = ExpSpinner2.getValue() * 12;
+        Integer exp3 = ExpSpinner3.getValue() * 12;
 
         // Get mandatory flags
         boolean mustHaveSkill1 = MandatoryCheckbox1.isSelected();
