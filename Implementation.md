@@ -84,15 +84,15 @@ The GUI is built using Javafx and the architecture is based on the following cod
 	b) Sets up the SpinnerValuefactory so that the spinner controls have only integer values and a min and max value.
 	c) Associates an event handler with the Button to find resumes matching the skills
 	
-   The logic in the event handler consists of:
-   	     a) Getting the various values from the controls (skill name, experience etc)
-	     b) Getting the index folder name from the textfield
-	     c) Converting the experience spinner values from years to months (multiplied by 12)
-	     d) Checking if the skill name is populated for each skill textfield and only then considering the remaining values from the controls
-	     e) Creating a list of UserQuery objects - each containing the skill details
-	     f) Performing a search by creating a edu.illinois.phantom.searchengine.SearchEngine object and passing on the list in the above step
-	     g) Getting the results (locations of matching resumes) and using substring to discard the folder path and only taking the Resume file name
-	     h) Clearing the Listbox for the results in the UI and adding the results (Resume names) to the Listbox
+The logic in the event handler consists of:
+	a) Getting the various values from the controls (skill name, experience etc)
+	b) Getting the index folder name from the textfield
+	c) Converting the experience spinner values from years to months (multiplied by 12)
+	d) Checking if the skill name is populated for each skill textfield and only then considering the remaining values from the controls
+	e) Creating a list of UserQuery objects - each containing the skill details
+	f) Performing a search by creating a edu.illinois.phantom.searchengine.SearchEngine object and passing on the list in the above step
+	g) Getting the results (locations of matching resumes) and using substring to discard the folder path and only taking the Resume file name
+	h) Clearing the Listbox for the results in the UI and adding the results (Resume names) to the Listbox
 
 
 #### Important Notes for Usage
