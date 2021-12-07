@@ -59,7 +59,7 @@ The Scoring engine takes over from here.
 
 ### Search UI
 
-Overview of the code
+#### Overview of the code
 ---------------------
 
 The GUI for the Resume Finder makes it easy to provide input for the needed skills and view output for the results (in the form of a list containing names of the Resume files containing the specified skills).
@@ -72,7 +72,7 @@ The GUI contains the following components/controls:
 4. Mandatory (Checkbox): These fields are used to input if the skills is mandatory - thus affecting the search. Please note that this field is only considered when skill field is filled in.
 
 
-Software Implementation
+#### Software Implementation
 ------------------------
 The GUI is built using Javafx and the architecture is based on the following code components:
 
@@ -96,7 +96,7 @@ The GUI is built using Javafx and the architecture is based on the following cod
 	     h) Clearing the Listbox for the results in the UI and adding the results (Resume names) to the Listbox
 
 
-Important Notes for Usage
+#### Important Notes for Usage
 --------------------------
 
 Due to the nature of the UI libraries across multiple OS, we have created two OS specific builds - one for Mac OS, and one for Windows OS. Please use the platform specific jar to run the application. Alternatively, you can build the specific build/jar file for your OS using "gradle build".
