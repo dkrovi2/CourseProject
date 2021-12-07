@@ -60,7 +60,6 @@ The Scoring engine takes over from here.
 ### Search UI
 
 #### Overview of the code
----------------------
 
 The GUI for the Resume Finder makes it easy to provide input for the needed skills and view output for the results (in the form of a list containing names of the Resume files containing the specified skills).
 
@@ -73,7 +72,7 @@ The GUI contains the following components/controls:
 
 
 #### Software Implementation
-------------------------
+
 The GUI is built using Javafx and the architecture is based on the following code components:
 
 1. The java code is under the package: edu.illinois.phantom.ui and the FXML file is under the resources folder edu.illinois.phantom.ui.
@@ -97,6 +96,5 @@ The GUI is built using Javafx and the architecture is based on the following cod
 
 
 #### Important Notes for Usage
---------------------------
 
 Due to the nature of the UI libraries across multiple OS, we have created two OS specific builds - one for Mac OS, and one for Windows OS. Please use the platform specific jar to run the application. Alternatively, you can build the specific build/jar file for your OS using "gradle build".
