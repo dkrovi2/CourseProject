@@ -1,5 +1,17 @@
 ## Resume Finder
 
+* [Implementation Overview](#implementation-overview)
+* [Parsing Engine](#parsing-engine)
+  + [Text Extraction](#text-extraction)
+  + [Reconstruct Resume Sections](#reconstruct-resume-sections)
+  + [Extract Skill Information](#extract-skill-information)
+* [Scoring or Indexing Engine](#scoring-or-indexing-engine)
+* [Search Engine](#search-engine)
+* [Search UI](#search-ui)
+  + [Overview of the code](#overview-of-the-code)
+  + [Software Implementation](#software-implementation)
+  + [Important Notes for Usage](#important-notes-for-usage)
+
 ### Implementation Overview
 
 The application has the following modules:

@@ -1,5 +1,12 @@
 # User Guide - Resume Finder
 
++ [Prerequisites](#prerequisites)
++ [Build](#build)
++ [Running](#running)
+  - [Parsing Engine](#parsing-engine)
+  - [Scoring Engine](#scoring-engine)
+  - [Search UI](#search-ui)
+
 ### Prerequisites
 
 * JDK 14
