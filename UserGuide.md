@@ -1,11 +1,13 @@
 # User Guide - Resume Finder
 
 + [Prerequisites](#prerequisites)
+  - [Windows OS](#windows-os)
 + [Build](#build)
 + [Running](#running)
   - [Parsing Engine](#parsing-engine)
   - [Scoring Engine](#scoring-engine)
   - [Search UI](#search-ui)
+  - [Sample Test Case](#sample-test-case)
 
 ### Prerequisites
 
@@ -22,6 +24,8 @@ OpenJDK Runtime Environment (build 14.0.2+12-46)
 OpenJDK 64-Bit Server VM (build 14.0.2+12-46, mixed mode, sharing)
 ~ % 
 ```
+### Windows OS
+For running in Windows OS please make sure you have git bash installed before running the below commands
 
 ### Build
 
@@ -131,3 +135,6 @@ Upon successful execution of the above command, the Search UI should appear:
 
 ![search-ui.png](search-ui.png)
 
+#### Sample Test Case
+
+![search-test-case.png](sample-test-case.png)
