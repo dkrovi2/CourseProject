@@ -44,7 +44,7 @@ The implementation details have been explained [`here`](https://github.com/dkrov
 
 #### Presentation
 
-***TODO***
+The software usage presentation can be found [`here`](https://github.com/dkrovi2/CourseProject/blob/main/final-submission/final-submission.pptx).
 
 ### Contacts
 
